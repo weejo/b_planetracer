@@ -1,6 +1,7 @@
 package at.jwe.planetracer.rest;
 
 import at.jwe.planetracer.data.record.*;
+import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.service.DataService;

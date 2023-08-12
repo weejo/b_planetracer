@@ -4,7 +4,9 @@ import at.jwe.planetracer.data.entity.HighscoreEntity;
 import at.jwe.planetracer.data.entity.LevelEntity;
 import at.jwe.planetracer.data.entity.ResultEntity;
 import at.jwe.planetracer.data.record.*;
-import at.jwe.planetracer.data.record.Cluster;
+import at.jwe.planetracer.data.record.cluster.Cluster;
+import at.jwe.planetracer.data.record.cluster.ClusterCollection;
+import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
 import at.jwe.planetracer.data.record.level.LayerInfo;
@@ -86,34 +88,14 @@ public class DataServiceImpl implements DataService {
     public ClusterResult getClusters(Long levelId) throws JsonProcessingException {
 
         List<ResultEntity> allByLevelId = resultRepository.findAllByLevelId(levelId);
-        List<Cluster> clusters = new ArrayList<>();
+        List<ClusterCollection> clusterCollections = new ArrayList<>();
         for (ResultEntity resultEntity : allByLevelId) {
 
-            List<Planet> planets = objectMapper.readValue(resultEntity.getResult(), objectMapper.getTypeFactory().constructCollectionType(List.class, Planet.class));
+            List<Cluster> clusterList = objectMapper.readValue(resultEntity.getResult(), objectMapper.getTypeFactory().constructCollectionType(List.class, Cluster.class));
 
-            clusters.add(new Cluster(planets));
+            clusterCollections.add(new ClusterCollection(clusterList));
         }
-        return new ClusterResult(clusters);
-    }
-
-    @Override
-    public Highscore getHighscore(Long levelId) {
-        Optional<LevelEntity> level = levelRepository.findById(levelId);
-
-        if (level.isEmpty()) return null;
-
-        List<HighscoreEntity> highscoreEntities = highscoreRepository.findAllByLevelId(levelId);
-
-        List<HighscoreEntity> sorted = highscoreEntities.stream()
-                .sorted(Comparator.comparing(HighscoreEntity::getPoints).reversed())
-                .toList();
-
-        List<HighscoreEntry> highscore = new ArrayList<>();
-        for (HighscoreEntity highscoreEntity : sorted) {
-            highscore.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
-        }
-
-        return new Highscore(highscore);
+        return new ClusterResult(clusterCollections);
     }
 
     @Override
@@ -121,7 +103,7 @@ public class DataServiceImpl implements DataService {
         Long levelId = playerResult.levelId();
 
         // We only want winners - otherwise it would not be fully clustered data.
-        List<List<Planet>> clusters = playerResult.clusterList();
+        List<Cluster> clusters = playerResult.clusters();
         if (!clusters.isEmpty()) {
 
             String clusterJSON = objectMapper.writeValueAsString(clusters);
@@ -162,6 +144,26 @@ public class DataServiceImpl implements DataService {
             }
         }
         return false;
+    }
+
+    @Override
+    public Highscore getHighscore(Long levelId) {
+        Optional<LevelEntity> level = levelRepository.findById(levelId);
+
+        if (level.isEmpty()) return null;
+
+        List<HighscoreEntity> highscoreEntities = highscoreRepository.findAllByLevelId(levelId);
+
+        List<HighscoreEntity> sorted = highscoreEntities.stream()
+                .sorted(Comparator.comparing(HighscoreEntity::getPoints).reversed())
+                .toList();
+
+        List<HighscoreEntry> highscore = new ArrayList<>();
+        for (HighscoreEntity highscoreEntity : sorted) {
+            highscore.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
+        }
+
+        return new Highscore(highscore);
     }
 
     @Override
