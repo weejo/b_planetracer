@@ -72,10 +72,10 @@ public class DataServiceImpl implements DataService {
                 .initialTime(mapData.initialTime())
                 .maxDistance(mapData.maxDistance())
                 .name(mapData.name())
-                .height(Math.abs(mostUp) + Math.abs(mostDown) + 600)
-                .width(Math.abs(mostLeft) + Math.abs(mostRight) + 600)
-                .levelX(mostLeft - 500)
-                .levelY(mostUp - 500)
+                .levelX(mostLeft - 600)
+                .levelY( (-1*mostUp) - 600)
+                .height(Math.abs(mostUp) + Math.abs(mostDown) + 1200)
+                .width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200)
                 .objects(objects)
                 .build();
 
