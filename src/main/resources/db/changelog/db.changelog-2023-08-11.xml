@@ -3,13 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet author="jwe" id="0">
-        <sql>
-            CREATE SCHEMA IF NOT EXISTS planetracer;
-        </sql>
-    </changeSet>
-
-    <changeSet id="1" author="jwe">
+    <changeSet id="0" author="jwe">
         <createTable tableName="level">
             <column name="levelid" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="levelPK"/>
@@ -48,7 +42,7 @@
     </changeSet>
 
 
-    <changeSet id="2" author="jwe">
+    <changeSet id="1" author="jwe">
         <createTable tableName="highscore">
             <column name="highscoreid" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="highscorePK"/>
@@ -65,7 +59,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="3" author="jwe">
+    <changeSet id="2" author="jwe">
             <createTable tableName="result">
                 <column name="resultid" type="BIGINT" autoIncrement="true">
                     <constraints nullable="false" primaryKey="true" primaryKeyName="resultPK"/>
@@ -79,22 +73,22 @@
             </createTable>
     </changeSet>
 
-    <changeSet id="4" author="jwe">
+    <changeSet id="3" author="jwe">
         <addUniqueConstraint tableName="level" columnNames="name" constraintName="UNIQUE_LEVEL_NAME"/>
     </changeSet>
     
-    <changeSet id="5" author="jwe">
+    <changeSet id="4" author="jwe">
         <addForeignKeyConstraint baseTableName="highscore" baseColumnNames="levelid" constraintName="FK_levelid_HIGHSCORE"
                                  referencedTableName="level"
                                  referencedColumnNames="levelid"/>
     </changeSet>
-    <changeSet id="6" author="jwe">
+    <changeSet id="5" author="jwe">
         <addForeignKeyConstraint baseTableName="result" baseColumnNames="levelid" constraintName="FK_levelid_RESULT"
                                  referencedTableName="level"
                                  referencedColumnNames="levelid"/>
     </changeSet>
     
-    <changeSet id="7" author="jwe">
+    <changeSet id="6" author="jwe">
         <createIndex tableName="level" indexName="LEVELNAME">
             <column name="name"/>
         </createIndex>
