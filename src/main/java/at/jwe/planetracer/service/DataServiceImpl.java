@@ -4,10 +4,7 @@ import at.jwe.planetracer.data.entity.HighscoreEntity;
 import at.jwe.planetracer.data.entity.LevelEntity;
 import at.jwe.planetracer.data.entity.ResultEntity;
 import at.jwe.planetracer.data.record.*;
-import at.jwe.planetracer.data.record.cluster.Cluster;
-import at.jwe.planetracer.data.record.cluster.ClusterCollection;
-import at.jwe.planetracer.data.record.cluster.ClusterResult;
-import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
+import at.jwe.planetracer.data.record.cluster.*;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
 import at.jwe.planetracer.data.record.level.LayerInfo;
@@ -92,18 +89,24 @@ public class DataServiceImpl implements DataService {
 
         List<ResultEntity> allByLevelId = resultRepository.findAllByLevelId(levelId);
         List<ClusterCollection> clusterCollections = new ArrayList<>();
-        List<IncidenceMatrix> incidenceCollections = new ArrayList<>();
 
         for (ResultEntity resultEntity : allByLevelId) {
 
             List<Cluster> clusterList = objectMapper.readValue(resultEntity.getResult(), objectMapper.getTypeFactory().constructCollectionType(List.class, Cluster.class));
-            IncidenceMatrix incidenceMatrix = objectMapper.readValue(resultEntity.getIncidence(), IncidenceMatrix.class);
-
-            incidenceCollections.add(incidenceMatrix);
 
             clusterCollections.add(new ClusterCollection(clusterList));
         }
-        return new ClusterResult(clusterCollections, incidenceCollections);
+        return new ClusterResult(clusterCollections);
+    }
+
+    @Override
+    public List<IncidenceMatrix> getIncidences(Long levelId) throws JsonProcessingException {
+        List<ResultEntity> allByLevelId = resultRepository.findAllByLevelId(levelId);
+        List<IncidenceMatrix> incidenceCollections = new ArrayList<>();
+        for (ResultEntity resultEntity : allByLevelId) {
+            incidenceCollections.add(objectMapper.readValue(resultEntity.getIncidence(), IncidenceMatrix.class));
+        }
+        return incidenceCollections;
     }
 
     @Override

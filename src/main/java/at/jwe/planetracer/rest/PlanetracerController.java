@@ -2,6 +2,8 @@ package at.jwe.planetracer.rest;
 
 import at.jwe.planetracer.data.record.*;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
+import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
+import at.jwe.planetracer.data.record.cluster.IncidenceResult;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.service.DataService;
@@ -9,6 +11,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/")
@@ -45,6 +49,23 @@ class PlanetracerController {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.ok(clusters);
+        }
+    }
+
+    /**
+     * Used to retrieve incidence matrices for user generated clusters for a given level.
+     * @param levelId the levelid you want all clusters from
+     * @return all user generated cluster incidence matrices
+     * @throws JsonProcessingException - the clusters are saved as json strings. should "never(TM)" be thrown.
+     */
+    @GetMapping(path = "incidence",
+            produces = "application/json")
+    public ResponseEntity<List<IncidenceMatrix>> getIncidences(@RequestParam Long levelId) throws JsonProcessingException {
+        List<IncidenceMatrix> incidences = dataService.getIncidences(levelId);
+        if (incidences == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(incidences);
         }
     }
 
