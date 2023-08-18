@@ -74,10 +74,18 @@ public class DataServiceImpl implements DataService {
             return false;
         }
 
-
         String objects = objectMapper.writeValueAsString(enrichedPlanets);
 
-        LevelEntity levelEntity = LevelEntity.builder().initialTime(mapData.initialTime()).maxDistance(mapData.maxDistance()).name(mapData.name()).numPlanets(enrichedPlanets.size()).levelX(mostLeft - 600).levelY((-1 * mostUp) - 600).height(Math.abs(mostUp) + Math.abs(mostDown) + 1200).width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200).objects(objects).build();
+        LevelEntity levelEntity = LevelEntity.builder()
+                .initialTime(mapData.initialTime())
+                .maxDistance(mapData.maxDistance())
+                .name(mapData.name())
+                .numPlanets(enrichedPlanets.size())
+                .heightCorrection(mapData.heightCorrection())
+                .levelX(mostLeft - 600)
+                .height(Math.abs(mostUp) + Math.abs(mostDown) + 1200)
+                .width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200)
+                .objects(objects).build();
 
         levelRepository.save(levelEntity);
         return true;
@@ -218,7 +226,7 @@ public class DataServiceImpl implements DataService {
         }
         List<OverviewLevel> overviewList = new ArrayList<>();
         for (LevelEntity level : allLevels) {
-            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getInitialTime(), level.getLevelX(), level.getLevelY(), level.getWidth(), level.getHeight()));
+            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getInitialTime(), level.getLevelX(), level.getHeightCorrection(), level.getWidth(), level.getHeight()));
         }
         return new LevelOverview(overviewList);
     }

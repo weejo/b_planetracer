@@ -20,8 +20,8 @@
             <column name="levelx" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="levely" type="BIGINT">
-                <constraints nullable="false"/>
+            <column name="heightcorrection" type="BIGINT">
+                <constraints nullable="true"/>
             </column>
             <column name="width" type="BIGINT">
                 <constraints nullable="false"/>

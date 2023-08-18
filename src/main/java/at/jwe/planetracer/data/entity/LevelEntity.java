@@ -37,8 +37,8 @@ public class LevelEntity {
     @Column(name = "levelx")
     private Long levelX;
 
-    @Column(name = "levely")
-    private Long levelY;
+    @Column(name = "heightcorrection")
+    private Long heightCorrection;
 
     @Column(name = "width")
     private Long width;
