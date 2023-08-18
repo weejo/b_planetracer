@@ -2,5 +2,5 @@ package at.jwe.planetracer.data.record.cluster;
 
 import java.util.List;
 
-public record ClusterResult(List<ClusterCollection> clusters) {
+public record ClusterResult(List<ClusterCollection> clusters, List<IncidenceMatrix> incidenceMatrices) {
 }

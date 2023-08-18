@@ -31,6 +31,9 @@ public class LevelEntity {
     @Column(name = "initialtime")
     private Long initialTime;
 
+    @Column(name = "numplanets")
+    private int numPlanets;
+
     @Column(name = "levelx")
     private Long levelX;
 

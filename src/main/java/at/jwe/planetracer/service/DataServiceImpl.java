@@ -7,6 +7,7 @@ import at.jwe.planetracer.data.record.*;
 import at.jwe.planetracer.data.record.cluster.Cluster;
 import at.jwe.planetracer.data.record.cluster.ClusterCollection;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
+import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
 import at.jwe.planetracer.data.record.level.LayerInfo;
@@ -18,13 +19,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static org.apache.logging.log4j.Level.ERROR;
+import static org.apache.logging.log4j.Level.INFO;
+
 @RequiredArgsConstructor
 @Service
 @Transactional
+@Log4j2
 public class DataServiceImpl implements DataService {
 
     private final HighscoreRepository highscoreRepository;
@@ -34,6 +40,7 @@ public class DataServiceImpl implements DataService {
 
     @Override
     public boolean addMap(MapData mapData) throws JsonProcessingException {
+        log.log(INFO, "Adding Map!");
         Optional<LevelEntity> level = levelRepository.findByName(mapData.name());
         if (level.isPresent()) {
             return false;
@@ -47,7 +54,9 @@ public class DataServiceImpl implements DataService {
         Random random = new Random();
         List<EnrichedPlanet> enrichedPlanets = new ArrayList<>();
 
-        for (Planet planet : mapData.planets()) {
+        for (int index = 0; index < mapData.planets().length; index++) {
+            Planet planet = mapData.planets()[index];
+
             if (mostRight == null || planet.x() > mostRight) {
                 mostRight = planet.x();
             }
@@ -60,24 +69,18 @@ public class DataServiceImpl implements DataService {
             if (mostDown == null || planet.y() < mostDown) {
                 mostDown = planet.y();
             }
-            enrichedPlanets.add(new EnrichedPlanet(planet.x(), planet.y(), random.nextInt(6), "planet"));
+            enrichedPlanets.add(new EnrichedPlanet(planet.x(), planet.y(), random.nextInt(6), "planet", index));
         }
 
-        if (mostUp == null || mostRight == null || mostLeft == null || mostDown == null) return false;
+        if (mostUp == null || mostRight == null || mostLeft == null || mostDown == null) {
+            log.log(ERROR, "Map values are not set!");
+            return false;
+        }
 
 
         String objects = objectMapper.writeValueAsString(enrichedPlanets);
 
-        LevelEntity levelEntity = LevelEntity.builder()
-                .initialTime(mapData.initialTime())
-                .maxDistance(mapData.maxDistance())
-                .name(mapData.name())
-                .levelX(mostLeft - 600)
-                .levelY( (-1*mostUp) - 600)
-                .height(Math.abs(mostUp) + Math.abs(mostDown) + 1200)
-                .width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200)
-                .objects(objects)
-                .build();
+        LevelEntity levelEntity = LevelEntity.builder().initialTime(mapData.initialTime()).maxDistance(mapData.maxDistance()).name(mapData.name()).numPlanets(enrichedPlanets.size()).levelX(mostLeft - 600).levelY((-1 * mostUp) - 600).height(Math.abs(mostUp) + Math.abs(mostDown) + 1200).width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200).objects(objects).build();
 
         levelRepository.save(levelEntity);
         return true;
@@ -89,13 +92,18 @@ public class DataServiceImpl implements DataService {
 
         List<ResultEntity> allByLevelId = resultRepository.findAllByLevelId(levelId);
         List<ClusterCollection> clusterCollections = new ArrayList<>();
+        List<IncidenceMatrix> incidenceCollections = new ArrayList<>();
+
         for (ResultEntity resultEntity : allByLevelId) {
 
             List<Cluster> clusterList = objectMapper.readValue(resultEntity.getResult(), objectMapper.getTypeFactory().constructCollectionType(List.class, Cluster.class));
+            IncidenceMatrix incidenceMatrix = objectMapper.readValue(resultEntity.getIncidence(), IncidenceMatrix.class);
+
+            incidenceCollections.add(incidenceMatrix);
 
             clusterCollections.add(new ClusterCollection(clusterList));
         }
-        return new ClusterResult(clusterCollections);
+        return new ClusterResult(clusterCollections, incidenceCollections);
     }
 
     @Override
@@ -106,23 +114,12 @@ public class DataServiceImpl implements DataService {
         List<Cluster> clusters = playerResult.clusters();
         if (!clusters.isEmpty()) {
 
-            String clusterJSON = objectMapper.writeValueAsString(clusters);
-
-            ResultEntity resultEntity = ResultEntity.builder()
-                    .result(clusterJSON)
-                    .levelId(levelId)
-                    .build();
-
-            resultRepository.save(resultEntity);
+            computeClusters(clusters, levelId);
         }
 
         List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
 
-        HighscoreEntity newScore = HighscoreEntity.builder()
-                .points(playerResult.entry().points())
-                .name(playerResult.entry().name())
-                .levelId(levelId)
-                .build();
+        HighscoreEntity newScore = HighscoreEntity.builder().points(playerResult.entry().points()).name(playerResult.entry().name()).levelId(levelId).build();
 
         if (allByLevelId.size() < 5) {
             allByLevelId.add(newScore);
@@ -130,20 +127,54 @@ public class DataServiceImpl implements DataService {
             return true;
         } else {
             HighscoreEntity lowest = null;
+            boolean bLowerThanNew = false;
             for (HighscoreEntity highscoreEntity : allByLevelId) {
-                if (lowest == null || lowest.getPoints() > highscoreEntity.getPoints() && highscoreEntity.getPoints() < newScore.getPoints()) {
+                if (highscoreEntity.getPoints() < newScore.getPoints()) {
+                    bLowerThanNew = true;
+                }
+
+                if (lowest == null) {
+                    lowest = highscoreEntity;
+                }
+
+                if (lowest.getPoints() > highscoreEntity.getPoints()) {
                     lowest = highscoreEntity;
                 }
             }
-            if (lowest != null) {
+            if (bLowerThanNew) {
                 highscoreRepository.delete(lowest);
                 highscoreRepository.save(newScore);
-                allByLevelId.remove(lowest);
-                allByLevelId.add(newScore);
                 return true;
             }
         }
         return false;
+    }
+
+    private void computeClusters(List<Cluster> clusters, Long levelId) throws JsonProcessingException {
+        Optional<LevelEntity> levelOpt = levelRepository.findById(levelId);
+        if (levelOpt.isEmpty()) return;
+        LevelEntity level = levelOpt.get();
+
+        // create incidence array and fill it with 0s
+        int[][] incidence = new int[level.getNumPlanets()][level.getNumPlanets()];
+
+        // compute incidences
+        for (Cluster cluster : clusters) {
+            for (int index = 0; index < cluster.planetList().size(); index++) {
+                Planet planet = cluster.planetList().get(index);
+                for (int inner = index; inner < cluster.planetList().size(); inner++) {
+                    incidence[cluster.planetList().get(inner).id()][planet.id()] = 1;
+                    incidence[planet.id()][cluster.planetList().get(inner).id()] = 1;
+                }
+            }
+        }
+
+        String clusterJSON = objectMapper.writeValueAsString(clusters);
+        String incidenceJSON = objectMapper.writeValueAsString(new IncidenceMatrix(incidence));
+
+        ResultEntity resultEntity = ResultEntity.builder().result(clusterJSON).incidence(incidenceJSON).levelId(levelId).build();
+
+        resultRepository.save(resultEntity);
     }
 
     @Override
@@ -154,9 +185,7 @@ public class DataServiceImpl implements DataService {
 
         List<HighscoreEntity> highscoreEntities = highscoreRepository.findAllByLevelId(levelId);
 
-        List<HighscoreEntity> sorted = highscoreEntities.stream()
-                .sorted(Comparator.comparing(HighscoreEntity::getPoints).reversed())
-                .toList();
+        List<HighscoreEntity> sorted = highscoreEntities.stream().sorted(Comparator.comparing(HighscoreEntity::getPoints).reversed()).toList();
 
         List<HighscoreEntry> highscore = new ArrayList<>();
         for (HighscoreEntity highscoreEntity : sorted) {
@@ -173,11 +202,9 @@ public class DataServiceImpl implements DataService {
         if (optionalLevel.isEmpty()) return null;
         LevelEntity level = optionalLevel.get();
 
-        List<EnrichedPlanet> enrichedPlanets = objectMapper.readValue(level.getObjects(),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, EnrichedPlanet.class));
+        List<EnrichedPlanet> enrichedPlanets = objectMapper.readValue(level.getObjects(), objectMapper.getTypeFactory().constructCollectionType(List.class, EnrichedPlanet.class));
 
-        return new Level(Arrays.asList(new LayerInfo("PLANET_LAYER", enrichedPlanets, "objectgroup")),
-                "orthogonal", new ArrayList<>());
+        return new Level(Arrays.asList(new LayerInfo("PLANET_LAYER", enrichedPlanets, "objectgroup")), "orthogonal", new ArrayList<>());
     }
 
     @Override
@@ -188,8 +215,7 @@ public class DataServiceImpl implements DataService {
         }
         List<OverviewLevel> overviewList = new ArrayList<>();
         for (LevelEntity level : allLevels) {
-            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getInitialTime(),
-                    level.getLevelX(), level.getLevelY(), level.getWidth(), level.getHeight()));
+            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getInitialTime(), level.getLevelX(), level.getLevelY(), level.getWidth(), level.getHeight()));
         }
         return new LevelOverview(overviewList);
     }
