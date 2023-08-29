@@ -61,6 +61,15 @@ jar {
     archiveFileName.set("planetracer-"+version+".jar")
 }
 
+docker {
+    url = 'unix:///var/run/docker.sock'
+    registryCredentials {
+        url = 'https://index.docker.io/v1/'
+        username = 'your-docker-hub-username'
+        password = 'your-docker-hub-password'
+    }
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }
@@ -80,5 +89,9 @@ tasks.register('buildImage', DockerBuildImage) {
     dependsOn createDockerFile, syncJar
     inputDir = createDockerFile.getDestDir()
     images = ["planetracer:"+version]
+    tags = ['your-docker-hub-username/planetracer:latest']
 }
-
+tasks.register('pushDockerImage', DockerPushImage) {
+    dependsOn buildImage
+    imageName = 'your-docker-hub-username/planetracer'
+}
