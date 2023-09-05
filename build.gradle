@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.2'
     id 'io.spring.dependency-management' version '1.1.2'
-    id("com.bmuschko.docker-remote-api") version "9.3.2"
+    id 'com.bmuschko.docker-remote-api' version '9.3.2'
 }
 
 import com.bmuschko.gradle.docker.tasks.image.*
@@ -50,6 +50,18 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
 }
 
+
+
+docker {
+    registryCredentials {
+        url = 'https://index.docker.io/v1/'
+        username = 'swedockeracc'
+        password = 'ad60LlNdWx1q3TZRp3fW'
+    }
+}
+
+
+
 jar {
     manifest {
         attributes(
@@ -80,5 +92,8 @@ tasks.register('buildImage', DockerBuildImage) {
     dependsOn createDockerFile, syncJar
     inputDir = createDockerFile.getDestDir()
     images = ["planetracer:"+version]
+}
+tasks.register('pushDockerImage', DockerPushImage) {
+    dependsOn buildImage
 }
 

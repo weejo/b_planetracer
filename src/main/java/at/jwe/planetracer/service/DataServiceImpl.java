@@ -76,12 +76,15 @@ public class DataServiceImpl implements DataService {
 
         String objects = objectMapper.writeValueAsString(enrichedPlanets);
 
+
+
         LevelEntity levelEntity = LevelEntity.builder()
-                .initialTime(mapData.initialTime())
-                .maxDistance(mapData.maxDistance())
-                .name(mapData.name())
+                .initialTime(mapData.initialTime() != null? mapData.initialTime() : 30)
+                .maxDistance(mapData.maxDistance() != null? mapData.maxDistance() : 100)
+                .minNeighbors(mapData.minNeighbors() != null? mapData.minNeighbors() : 2)
+                .name(mapData.name() != null? mapData.name() : "NoName"+Math.random())
                 .numPlanets(enrichedPlanets.size())
-                .heightCorrection(mapData.heightCorrection())
+                .heightCorrection(mapData.heightCorrection() != null? mapData.heightCorrection() : 0)
                 .levelX(mostLeft - 600)
                 .height(Math.abs(mostUp) + Math.abs(mostDown) + 1200)
                 .width(Math.abs(mostLeft) + Math.abs(mostRight) + 1200)
@@ -90,6 +93,7 @@ public class DataServiceImpl implements DataService {
         levelRepository.save(levelEntity);
         return true;
     }
+
 
 
     @Override
@@ -226,7 +230,7 @@ public class DataServiceImpl implements DataService {
         }
         List<OverviewLevel> overviewList = new ArrayList<>();
         for (LevelEntity level : allLevels) {
-            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getInitialTime(), level.getLevelX(), level.getHeightCorrection(), level.getWidth(), level.getHeight()));
+            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId(), level.getMaxDistance(), level.getMinNeighbors(), level.getInitialTime(), level.getLevelX(), level.getHeightCorrection(), level.getWidth(), level.getHeight()));
         }
         return new LevelOverview(overviewList);
     }

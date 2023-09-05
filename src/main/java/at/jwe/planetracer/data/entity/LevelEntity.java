@@ -28,6 +28,9 @@ public class LevelEntity {
     @Column(name = "maxdistance")
     private Long maxDistance;
 
+    @Column(name = "minneighbors")
+    private Long minNeighbors;
+
     @Column(name = "initialtime")
     private Long initialTime;
 

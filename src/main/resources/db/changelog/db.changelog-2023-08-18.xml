@@ -17,4 +17,10 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="9" author="jwe">
+        <addColumn tableName="level">
+            <column name="minneighbors" type="BIGINT" defaultValue="2">
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
