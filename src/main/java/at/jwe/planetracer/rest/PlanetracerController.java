@@ -27,11 +27,11 @@ class PlanetracerController {
      * @param mapData the name + planets that should be put inside the level
      * @return whether the level got created
      */
-    @PostMapping(path = "map",
+    @PostMapping(path = "level",
             produces = "application/json",
             consumes = "application/json")
-    public ResponseEntity<Boolean> addMap(@RequestBody MapData mapData) throws JsonProcessingException {
-        return ResponseEntity.ok(dataService.addMap(mapData));
+    public ResponseEntity<Boolean> addLevel(@RequestBody MapData mapData) throws JsonProcessingException {
+        return ResponseEntity.ok(dataService.addLevel(mapData));
     }
 
     /**

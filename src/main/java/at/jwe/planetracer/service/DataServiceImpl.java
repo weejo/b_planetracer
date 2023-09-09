@@ -36,7 +36,7 @@ public class DataServiceImpl implements DataService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public boolean addMap(MapData mapData) throws JsonProcessingException {
+    public boolean addLevel(MapData mapData) throws JsonProcessingException {
         log.log(INFO, "Adding Map!");
         Optional<LevelEntity> level = levelRepository.findByName(mapData.name());
         if (level.isPresent()) {

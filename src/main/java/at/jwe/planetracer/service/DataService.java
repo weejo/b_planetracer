@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface DataService {
 
-    boolean addMap(MapData mapData) throws JsonProcessingException;
+    boolean addLevel(MapData mapData) throws JsonProcessingException;
 
     ClusterResult getClusters(Long levelId) throws JsonProcessingException;
 
