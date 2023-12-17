@@ -37,7 +37,8 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'net.lbruun.springboot:preliquibase-spring-boot-starter:1.4.0'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -48,18 +49,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'com.h2database:h2:2.2.224'
 }
-
-
-
-docker {
-    registryCredentials {
-        url = 'https://index.docker.io/v1/'
-        username = 'swedockeracc'
-        password = 'ad60LlNdWx1q3TZRp3fW'
-    }
-}
-
 
 
 jar {

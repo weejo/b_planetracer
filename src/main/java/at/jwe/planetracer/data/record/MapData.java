@@ -1,4 +1,6 @@
 package at.jwe.planetracer.data.record;
 
-public record MapData(String name, Long maxDistance, Long minNeighbors, Long initialTime, Long heightCorrection, Planet[] planets) {
+import java.util.List;
+
+public record MapData(String name, Long squareSize, Long initialTime, Double decay, List<DataPoint> dataPoints, Long resolutionX, Long resolutionY) {
 }

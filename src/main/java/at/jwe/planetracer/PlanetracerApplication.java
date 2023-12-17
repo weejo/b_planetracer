@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PlanetracerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PlanetracerApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(PlanetracerApplication.class, args);
+    }
 }

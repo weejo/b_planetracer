@@ -1,8 +1,4 @@
 package at.jwe.planetracer.data.record.level;
 
-import at.jwe.planetracer.data.record.EnrichedPlanet;
-
-import java.util.List;
-
-public record LayerInfo(String name, List<EnrichedPlanet> objects, String type) {
+public record LayerInfo(String name, String data, Long height, double opacity, String type, boolean visible, Long width) {
 }
