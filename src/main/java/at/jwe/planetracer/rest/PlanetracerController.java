@@ -1,9 +1,10 @@
 package at.jwe.planetracer.rest;
 
-import at.jwe.planetracer.data.record.*;
+import at.jwe.planetracer.data.record.LevelOverview;
+import at.jwe.planetracer.data.record.MapData;
+import at.jwe.planetracer.data.record.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
-import at.jwe.planetracer.data.record.cluster.IncidenceResult;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.service.DataService;
@@ -30,12 +31,13 @@ class PlanetracerController {
     @PostMapping(path = "level",
             produces = "application/json",
             consumes = "application/json")
-    public ResponseEntity<Boolean> addLevel(@RequestBody MapData mapData) throws JsonProcessingException {
+    public ResponseEntity<Level> addLevel(@RequestBody MapData mapData) throws JsonProcessingException {
         return ResponseEntity.ok(dataService.addLevel(mapData));
     }
 
     /**
      * Used to retrieve all user generated clusters for a given level.
+     *
      * @param levelId the levelid you want all clusters from
      * @return all user generated clusters
      * @throws JsonProcessingException - the clusters are saved as json strings. should "never(TM)" be thrown.
@@ -54,6 +56,7 @@ class PlanetracerController {
 
     /**
      * Used to retrieve incidence matrices for user generated clusters for a given level.
+     *
      * @param levelId the levelid you want all clusters from
      * @return all user generated cluster incidence matrices
      * @throws JsonProcessingException - the clusters are saved as json strings. should "never(TM)" be thrown.
@@ -71,6 +74,7 @@ class PlanetracerController {
 
     /**
      * Can be used to discover all existing levels - since accessing them to get clusters requires their ID.
+     *
      * @return all exisitng levels in a short overview.
      */
     @GetMapping(path = "overview",

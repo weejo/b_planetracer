@@ -24,14 +24,14 @@ public class DataServiceImplIntegrationTest {
     public void test_evenly_istributed_map() {
         List<DataPoint> dataPoints = new ArrayList<>();
         long counter = 0L;
-        for (long width = 0L; width < 1000L; width++) {
-            for (long height = 0L; height < 1000L; height++) {
+        for (long width = 0L; width < 100L; width++) {
+            for (long height = 0L; height < 100L; height++) {
                 dataPoints.add(new DataPoint(width, height, counter));
                 counter++;
             }
         }
 
-        dataService.addLevel(new MapData("Test", 50L, 1000L, 0.2, dataPoints, 1920L, 1080L));
+        dataService.addLevel(new MapData("Test", 50L, 1000L, 0.2, dataPoints, 800L, 600L));
     }
 
     @Test

@@ -37,5 +37,5 @@ public class LevelEntity {
     private Long playerY;
 
     @Column(name = "data")
-    private String data;
+    private int[] data;
 }

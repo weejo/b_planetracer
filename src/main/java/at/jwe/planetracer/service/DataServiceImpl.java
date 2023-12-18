@@ -1,7 +1,10 @@
 package at.jwe.planetracer.service;
 
 import at.jwe.planetracer.data.entity.LevelEntity;
-import at.jwe.planetracer.data.record.*;
+import at.jwe.planetracer.data.record.LevelOverview;
+import at.jwe.planetracer.data.record.MapData;
+import at.jwe.planetracer.data.record.OverviewLevel;
+import at.jwe.planetracer.data.record.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
 import at.jwe.planetracer.data.record.highscore.Highscore;
@@ -28,67 +31,81 @@ public class DataServiceImpl implements DataService {
     private final LevelRepository levelRepository;
 
     @Override
-    public boolean addLevel(MapData mapData) {
+    public Level addLevel(MapData mapData) {
         log.atInfo().log("Adding Map!");
-        Optional<LevelEntity> level = levelRepository.findByName(mapData.name());
-        if (level.isPresent()) {
-            return false;
+        Optional<LevelEntity> existing = levelRepository.findByName(mapData.name());
+        if (existing.isPresent()) {
+            return getLevelOutput(existing.get());
         }
 
-        List<Double> cellValues = new ArrayList<>();
+        List<Double> cellValues;
 
-        for (int x = 0; x < mapData.resolutionX(); x++) {
-            for (int y = 0; y < mapData.resolutionY(); y++) {
-                double cellValue = 0.0;
-                Point currentPoint = new Point(x, y);
-                for (DataPoint dataPoint : mapData.dataPoints()) {
-                    // x -> exp(-beta*dist(x, x_0)
-                    cellValue += Math.exp(-mapData.decay() * getDist(currentPoint, dataPoint));
-                }
-                cellValues.add(cellValue);
-            }
+        try {
+            cellValues = computeCellValues(mapData);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        OptionalDouble max = cellValues.stream().mapToDouble(v -> v).max();
-        List<Double> resultList = new ArrayList<>();
-        for (Double v : cellValues) {
-            resultList.add(v / max.getAsDouble());
-        }
-
-        String resultingMapString = concatingResultMapString(resultList);
+        List<Integer> resultList = normalizeAndCleanCellValues(cellValues);
 
 
-        LevelEntity levelEntity = LevelEntity.builder()
+        LevelEntity level = LevelEntity.builder()
                 .initialTime(mapData.initialTime() != null ? mapData.initialTime() : 30)
                 .name(mapData.name() != null ? mapData.name() : "NoName" + Math.random())
                 .height(mapData.resolutionY())
                 .width(mapData.resolutionX())
-                .data(resultingMapString)
+                .data(resultList.stream().mapToInt(i->i).toArray())
                 .build();
 
-        levelRepository.save(levelEntity);
-        return true;
+        levelRepository.save(level);
+
+        return getLevelOutput(level);
     }
 
-    private static String concatingResultMapString(List<Double> resultList) {
-        log.atInfo().log("Creating Map String.");
+    private static Level getLevelOutput(LevelEntity level) {
+        return new Level(List.of(new LayerInfo(level.getName(), level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth())),
+                "orthogonal",
+                List.of(new Tileset(1, "basicset", 16, 176, 0, "backgroundtileset", 0, 16, 16)));
+    }
 
-        StringBuilder resultingMapString = new StringBuilder("[");
+    private List<Double> computeCellValues(MapData mapData) throws InterruptedException {
+        List<Double> cellValues;
 
-        for (int element = 0; element < resultList.size(); element++) {
-            resultingMapString.append(element);
+        long floor = (long) Math.floor((double) mapData.resolutionY() / 4);
 
-            if (element != (resultList.size() - 1)) {
-                resultingMapString.append(", ");
-            } else {
-                resultingMapString.append("]");
-            }
+        ComputationRunnable run1 = new ComputationRunnable(mapData, 0, floor);
+        ComputationRunnable run2 = new ComputationRunnable(mapData, floor, 2 * floor);
+        ComputationRunnable run3 = new ComputationRunnable(mapData, 2 * floor, 3 * floor);
+        ComputationRunnable run4 = new ComputationRunnable(mapData, 3 * floor, mapData.resolutionY());
+        Thread thread1 = new Thread(run1);
+        Thread thread2 = new Thread(run2);
+        Thread thread3 = new Thread(run3);
+        Thread thread4 = new Thread(run4);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+
+        thread1.join();
+        cellValues = new ArrayList<>(run1.getCellValues());
+        thread2.join();
+        cellValues.addAll(run2.getCellValues());
+        thread3.join();
+        cellValues.addAll(run3.getCellValues());
+        thread4.join();
+        cellValues.addAll(run4.getCellValues());
+
+        return cellValues;
+    }
+
+    private List<Integer> normalizeAndCleanCellValues(List<Double> cellValues) {
+        OptionalDouble max = cellValues.stream().mapToDouble(v -> v).max();
+        List<Integer> resultList = new ArrayList<>();
+        for (Double v : cellValues) {
+            resultList.add((int) Math.floor((v / max.getAsDouble()) * 10));
         }
-        return resultingMapString.toString();
-    }
-
-    private Double getDist(Point point, DataPoint dataPoint) {
-        return Math.sqrt(((dataPoint.y() - point.y()) * (dataPoint.y() - point.y())) + ((dataPoint.x() - point.x()) * (dataPoint.x() - point.x())));
+        return resultList;
     }
 
 
@@ -121,9 +138,7 @@ public class DataServiceImpl implements DataService {
         LevelEntity level = optionalLevel.get();
 
 
-        return new Level(List.of(new LayerInfo("World1", level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth())),
-                "orthogonal",
-                List.of(new Tileset(1, "basicset", 16, 176, 0, "backgroundtileset", 0, 16, 16)));
+        return getLevelOutput(level);
     }
 
     @Override
