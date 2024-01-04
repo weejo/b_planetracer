@@ -1,6 +1,6 @@
 package at.jwe.planetracer.data.record.cluster;
 
-import at.jwe.planetracer.data.record.DataPoint;
+import at.jwe.planetracer.data.record.data.DataPoint;
 
 import java.util.List;
 

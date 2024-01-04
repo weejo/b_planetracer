@@ -1,7 +1,7 @@
 package at.jwe.planetracer.rest;
 
 import at.jwe.planetracer.data.record.LevelOverview;
-import at.jwe.planetracer.data.record.MapData;
+import at.jwe.planetracer.data.record.data.MapData;
 import at.jwe.planetracer.data.record.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;

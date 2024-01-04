@@ -1,41 +1,41 @@
 package at.jwe.planetracer.service;
 
-import at.jwe.planetracer.data.record.DataPoint;
-import at.jwe.planetracer.data.record.MapData;
+import at.jwe.planetracer.data.record.data.DataPoint;
+import at.jwe.planetracer.data.record.data.MapConfig;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static at.jwe.planetracer.service.PointUtil.getDist;
+
 @Getter
 public class ComputationRunnable implements Runnable {
     private final List<Double> cellValues = new ArrayList<>();
 
-    private final MapData mapData;
+    private final MapConfig mapConfig;
     private final long startRow;
     private final long endRow;
 
-    ComputationRunnable(MapData mapData, long startRow, long endRow) {
-        this.mapData = mapData;
+    ComputationRunnable(MapConfig mapConfig, long startRow, long endRow) {
+        this.mapConfig = mapConfig;
         this.startRow = startRow;
         this.endRow = endRow;
     }
 
-    private Double getDist(long x, long y, DataPoint dataPoint) {
-        return Math.sqrt(((dataPoint.y() - y) * (dataPoint.y() - y)) + ((dataPoint.x() - x) * (dataPoint.x() - x)));
-    }
+
 
     @Override
     public void run() {
         System.out.println("Thread " + Thread.currentThread().getId() + " started!");
         for (long y = startRow; y < endRow; y++) {
-            for (long x = 0; x < mapData.resolutionX(); x++) {
+            for (long x = 0; x < mapConfig.getHighestX(); x++) {
 
                 double cellValue = 0.0;
 
-                for (DataPoint dataPoint : mapData.dataPoints()) {
+                for (DataPoint dataPoint : mapConfig.getDataPoints()) {
                     // x -> exp(-beta*dist(x, x_0)
-                    cellValue += Math.exp(-mapData.decay() * getDist(x, y, dataPoint));
+                    cellValue += Math.exp(-mapConfig.getDecay() * getDist(x, y, dataPoint));
                 }
                 cellValues.add(cellValue);
             }

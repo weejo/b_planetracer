@@ -2,11 +2,12 @@ package at.jwe.planetracer.service;
 
 import at.jwe.planetracer.data.entity.LevelEntity;
 import at.jwe.planetracer.data.record.LevelOverview;
-import at.jwe.planetracer.data.record.MapData;
 import at.jwe.planetracer.data.record.OverviewLevel;
 import at.jwe.planetracer.data.record.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
+import at.jwe.planetracer.data.record.data.MapConfig;
+import at.jwe.planetracer.data.record.data.MapData;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.level.LayerInfo;
 import at.jwe.planetracer.data.record.level.Level;
@@ -15,6 +16,7 @@ import at.jwe.planetracer.repository.LevelRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +32,10 @@ public class DataServiceImpl implements DataService {
 
     private final LevelRepository levelRepository;
 
+    @Autowired
+    private MapConfigService mapConfigService;
+
+
     @Override
     public Level addLevel(MapData mapData) {
         log.atInfo().log("Adding Map!");
@@ -38,45 +44,60 @@ public class DataServiceImpl implements DataService {
             return getLevelOutput(existing.get());
         }
 
-        List<Double> cellValues;
+        MapConfig mapConfig = mapConfigService.computeMapConfig(mapData);
 
-        try {
-            cellValues = computeCellValues(mapData);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        List<Double> cellValues = generateCellValues(mapConfig);
 
         List<Integer> resultList = normalizeAndCleanCellValues(cellValues);
 
-
-        LevelEntity level = LevelEntity.builder()
-                .initialTime(mapData.initialTime() != null ? mapData.initialTime() : 30)
-                .name(mapData.name() != null ? mapData.name() : "NoName" + Math.random())
-                .height(mapData.resolutionY())
-                .width(mapData.resolutionX())
-                .data(resultList.stream().mapToInt(i->i).toArray())
-                .build();
-
-        levelRepository.save(level);
+        LevelEntity level = persistLevelEntity(mapData, mapConfig, resultList);
 
         return getLevelOutput(level);
     }
 
-    private static Level getLevelOutput(LevelEntity level) {
-        return new Level(List.of(new LayerInfo(level.getName(), level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth())),
-                "orthogonal",
-                List.of(new Tileset(1, "basicset", 16, 176, 0, "backgroundtileset", 0, 16, 16)));
+    private LevelEntity persistLevelEntity(MapData mapData, MapConfig mapConfig, List<Integer> resultList) {
+        LevelEntity level = LevelEntity.builder()
+                .initialTime(mapData.initialTime() != null ? mapData.initialTime() : 30)
+                .name(mapData.name() != null ? mapData.name() : "NoName" + Math.random())
+                .height(mapConfig.getHighestY())
+                .width(mapConfig.getHighestX())
+                .data(resultList.stream().mapToInt(i -> i).toArray())
+                .build();
+
+        levelRepository.save(level);
+        return level;
     }
 
-    private List<Double> computeCellValues(MapData mapData) throws InterruptedException {
+    private List<Double> generateCellValues(MapConfig mapConfig) {
+        List<Double> cellValues;
+        try {
+            cellValues = computeCellValues(mapConfig);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return cellValues;
+    }
+
+
+    private static Level getLevelOutput(LevelEntity level) {
+        return new Level(List.of(new LayerInfo(level.getName(), level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth(), 0, 0)),
+                "orthogonal",
+                8,
+                8,
+                List.of(new Tileset(0, "tileset.png", 16, 176, 0, "backgroundtileset", 0, 16, 16)));
+    }
+
+    private List<Double> computeCellValues(MapConfig mapConfig) throws InterruptedException {
         List<Double> cellValues;
 
-        long floor = (long) Math.floor((double) mapData.resolutionY() / 4);
+        /* 8 pixel wide & high, 4 threads. */
+        long floor = mapConfig.getHighestY() / 4;
 
-        ComputationRunnable run1 = new ComputationRunnable(mapData, 0, floor);
-        ComputationRunnable run2 = new ComputationRunnable(mapData, floor, 2 * floor);
-        ComputationRunnable run3 = new ComputationRunnable(mapData, 2 * floor, 3 * floor);
-        ComputationRunnable run4 = new ComputationRunnable(mapData, 3 * floor, mapData.resolutionY());
+        ComputationRunnable run1 = new ComputationRunnable(mapConfig, 0, floor);
+        ComputationRunnable run2 = new ComputationRunnable(mapConfig, floor, 2 * floor);
+        ComputationRunnable run3 = new ComputationRunnable(mapConfig, 2 * floor, 3 * floor);
+        ComputationRunnable run4 = new ComputationRunnable(mapConfig, 3 * floor, mapConfig.getHighestY());
+
         Thread thread1 = new Thread(run1);
         Thread thread2 = new Thread(run2);
         Thread thread3 = new Thread(run3);

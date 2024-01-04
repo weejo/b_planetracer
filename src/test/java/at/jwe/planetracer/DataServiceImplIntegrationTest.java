@@ -1,7 +1,7 @@
 package at.jwe.planetracer;
 
-import at.jwe.planetracer.data.record.DataPoint;
-import at.jwe.planetracer.data.record.MapData;
+import at.jwe.planetracer.data.record.data.DataPoint;
+import at.jwe.planetracer.data.record.data.MapData;
 import at.jwe.planetracer.repository.LevelRepository;
 import at.jwe.planetracer.service.DataServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ public class DataServiceImplIntegrationTest {
             }
         }
 
-        dataService.addLevel(new MapData("Test", 50L, 1000L, 0.2, dataPoints, 800L, 600L));
+        dataService.addLevel(new MapData("Test", 50L, 0.1, dataPoints));
     }
 
     @Test
@@ -46,6 +46,6 @@ public class DataServiceImplIntegrationTest {
             }
         }
 
-        dataService.addLevel(new MapData("Test", 1L, 100L, 0.2, dataPoints, 1920L, 1080L));
+        dataService.addLevel(new MapData("Test", 1L, 0.5, dataPoints));
     }
 }
