@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 @NoArgsConstructor
 public class MapConfigService {
-    private static final int MARGIN = 50;
+    private static final Long MARGIN = 250L;
+    private Long changeX= Long.MAX_VALUE;
+    private Long changeY = Long.MAX_VALUE;
 
     public MapConfig computeMapConfig(MapData mapData) {
         MapConfig mapConfig = getMapConfig(mapData);
@@ -23,46 +25,69 @@ public class MapConfigService {
 
     private void transformData(MapConfig mapConfig) {
         for (DataPoint dataPoint : mapConfig.getDataPoints()) {
-            dataPoint.setX(dataPoint.getX() + mapConfig.getChangeX());
-            dataPoint.setY(dataPoint.getY() + mapConfig.getChangeY());
+            dataPoint.setX(dataPoint.getX() + changeX);
+            dataPoint.setY(dataPoint.getY() + changeY);
         }
     }
 
+    /**
+     * This function computes how much we have to move a single point so it fits into phasers coordinate system.
+     *
+     * @param mapConfig the map config
+     */
     private void computeChanges(MapConfig mapConfig) {
-        if (mapConfig.getChangeX() <= 0) {
-            mapConfig.setChangeX(Math.abs(mapConfig.getChangeX()) + MARGIN);
+        // (-100, -200) changeX = +350, changeY = +450
+        // (-100, 200) changeX = +350, changeY = 50
+        // (100, 200) changeX = 150, changeY = 50
+        // (400, 300) changeX = -150, changeY = -50
+
+        // ChangeX/Y are currently just the lowest positon in the data.
+        // so -100 needs to be moved by + 100
+        if(changeX <= 0) {
+            changeX = -changeX;
+            changeX += MARGIN;
         } else {
-            mapConfig.setChangeX(MARGIN - mapConfig.getChangeX());
+            if (changeX <= MARGIN) {
+                changeX = MARGIN - changeX;
+            } else {
+                changeX = -(changeX - MARGIN);
+            }
         }
 
-        if (mapConfig.getChangeY() <= 0) {
-            mapConfig.setChangeY(Math.abs(mapConfig.getChangeY()) + MARGIN);
+        if (changeY <= 0) {
+            changeY = -changeY;
+            changeY += MARGIN;
         } else {
-            mapConfig.setChangeY(MARGIN - mapConfig.getChangeY());
+            if (changeY <= MARGIN) {
+                changeY += MARGIN - changeY;
+            } else {
+                changeY = -(changeY - MARGIN);
+            }
         }
 
-        mapConfig.setHighestX(mapConfig.getHighestX() + mapConfig.getChangeX());
-        mapConfig.setHighestY(mapConfig.getHighestY() + mapConfig.getChangeY());
+        // Properly set highestX and highestY with the now known changeX/Y values.
+        mapConfig.setHighestX(mapConfig.getHighestX() + changeX);
+        mapConfig.setHighestY(mapConfig.getHighestY() + changeY);
     }
 
     private MapConfig getMapConfig(MapData mapData) {
+        // initialise default values
         MapConfig mapConfig = MapConfig.builder()
-                .changeX(Long.MAX_VALUE)
-                .changeY(Long.MAX_VALUE)
                 .highestX(Long.MIN_VALUE)
                 .highestY(Long.MIN_VALUE)
                 .dataPoints(mapData.dataPoints())
                 .build();
 
+        //compute all currently possible values (change + highest)
         for (DataPoint dataPoint : mapData.dataPoints()) {
-            if (dataPoint.getX() < mapConfig.getChangeX()) {
-                mapConfig.setChangeX(dataPoint.getX());
+            if (dataPoint.getX() < changeX) {
+                changeX = dataPoint.getX();
             }
             if (dataPoint.getX() > mapConfig.getHighestX()) {
                 mapConfig.setHighestX(dataPoint.getX());
             }
-            if (dataPoint.getY() < mapConfig.getChangeY()) {
-                mapConfig.setChangeY(dataPoint.getY());
+            if (dataPoint.getY() < changeX) {
+                changeY = dataPoint.getY();
             }
             if (dataPoint.getY() > mapConfig.getHighestY()) {
                 mapConfig.setHighestY(dataPoint.getY());

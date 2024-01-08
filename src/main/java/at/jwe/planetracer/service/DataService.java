@@ -2,28 +2,23 @@ package at.jwe.planetracer.service;
 
 import at.jwe.planetracer.data.record.LevelOverview;
 import at.jwe.planetracer.data.record.data.MapData;
-import at.jwe.planetracer.data.record.PlayerResult;
+import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
-import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.level.Level;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import java.util.List;
 
 public interface DataService {
 
-    Level addLevel(MapData mapData) throws JsonProcessingException;
+    Level addLevel(MapData mapData);
 
-    ClusterResult getClusters(Long levelId) throws JsonProcessingException;
+    ClusterResult getClusters(Long levelId, Long threshold);
 
     Highscore getHighscore(Long levelId);
 
-    boolean addResult(PlayerResult playerResult) throws JsonProcessingException;
+    Highscore addResult(PlayerResult result);
 
-    Level getLevelData(Long levelId) throws JsonProcessingException;
+    Level getLevelData(Long levelId);
 
     LevelOverview getLevelOverview();
 
-    List<IncidenceMatrix> getIncidences(Long levelId) throws JsonProcessingException;
 }

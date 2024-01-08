@@ -10,9 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MapConfig {
-    private Long changeX;
     private Long highestX;
-    private Long changeY;
     private Long highestY;
     private double decay;
     private List<DataPoint> dataPoints;

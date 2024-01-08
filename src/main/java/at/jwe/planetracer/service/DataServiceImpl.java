@@ -1,28 +1,29 @@
 package at.jwe.planetracer.service;
 
+import at.jwe.planetracer.data.entity.HighscoreEntity;
 import at.jwe.planetracer.data.entity.LevelEntity;
+import at.jwe.planetracer.data.entity.ResultEntity;
 import at.jwe.planetracer.data.record.LevelOverview;
 import at.jwe.planetracer.data.record.OverviewLevel;
-import at.jwe.planetracer.data.record.PlayerResult;
+import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
-import at.jwe.planetracer.data.record.cluster.IncidenceMatrix;
 import at.jwe.planetracer.data.record.data.MapConfig;
 import at.jwe.planetracer.data.record.data.MapData;
 import at.jwe.planetracer.data.record.highscore.Highscore;
+import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
 import at.jwe.planetracer.data.record.level.LayerInfo;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.data.record.level.Tileset;
+import at.jwe.planetracer.repository.HighscoreRepository;
 import at.jwe.planetracer.repository.LevelRepository;
+import at.jwe.planetracer.repository.ResultRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -31,6 +32,10 @@ import java.util.OptionalDouble;
 public class DataServiceImpl implements DataService {
 
     private final LevelRepository levelRepository;
+
+    private final ResultRepository resultRepository;
+
+    private final HighscoreRepository highscoreRepository;
 
     @Autowired
     private MapConfigService mapConfigService;
@@ -90,7 +95,6 @@ public class DataServiceImpl implements DataService {
     private List<Double> computeCellValues(MapConfig mapConfig) throws InterruptedException {
         List<Double> cellValues;
 
-        /* 8 pixel wide & high, 4 threads. */
         long floor = mapConfig.getHighestY() / 4;
 
         ComputationRunnable run1 = new ComputationRunnable(mapConfig, 0, floor);
@@ -131,35 +135,70 @@ public class DataServiceImpl implements DataService {
 
 
     @Override
-    public ClusterResult getClusters(Long levelId) {
+    public ClusterResult getClusters(Long levelId, Long threshold) {
 
         return null;
-    }
-
-    @Override
-    public List<IncidenceMatrix> getIncidences(Long levelId) {
-        return null;
-    }
-
-    @Override
-    public boolean addResult(PlayerResult playerResult) {
-        return true;
     }
 
     @Override
     public Highscore getHighscore(Long levelId) {
-        return null;
+        List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
+        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints));
+        List<HighscoreEntry> highscoreEntryList = new ArrayList<>();
+        for (HighscoreEntity highscoreEntity : allByLevelId) {
+            highscoreEntryList.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
+        }
+        return new Highscore(highscoreEntryList);
+    }
+
+    @Override
+    public Highscore addResult(PlayerResult result) {
+        Long levelId = result.levelId();
+
+        ResultEntity resultEntity = ResultEntity.builder()
+                .result(result.data())
+                .levelId(levelId)
+                .build();
+
+        resultRepository.save(resultEntity);
+
+        List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
+        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints));
+
+        HighscoreEntity newScore = HighscoreEntity.builder()
+                .points(result.entry().points())
+                .name(result.entry().name())
+                .levelId(levelId)
+                .build();
+
+        if (allByLevelId.size() <= 5) {
+            allByLevelId.add(newScore);
+            highscoreRepository.save(newScore);
+        } else {
+            HighscoreEntity last = allByLevelId.get(allByLevelId.size() - 1);
+            if(result.entry().points() > last.getPoints()) {
+                allByLevelId.remove(last);
+                highscoreRepository.save(newScore);
+                allByLevelId.add(newScore);
+            }
+        }
+        List<HighscoreEntry> highscore = new ArrayList<>();
+        for (HighscoreEntity highscoreEntity : allByLevelId) {
+            highscore.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
+        }
+        return new Highscore(highscore);
     }
 
     @Override
     public Level getLevelData(Long levelId) {
-        Optional<LevelEntity> optionalLevel = levelRepository.findById(levelId);
+        Optional<LevelEntity> levelEntity = levelRepository.findById(levelId);
 
-        if (optionalLevel.isEmpty()) return null;
-        LevelEntity level = optionalLevel.get();
+        if(levelEntity.isEmpty()) {
+            throw new RuntimeException("Level with given ID:" + levelId + " not found!");
+        }
 
+        return getLevelOutput(levelEntity.get());
 
-        return getLevelOutput(level);
     }
 
     @Override

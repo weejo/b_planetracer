@@ -22,8 +22,8 @@ public class ResultEntity {
     private Long levelId;
 
     @Column(name = "result")
-    private String result;
+    private int[] result;
 
     @Column(name = "incidence")
-    private String incidence;
+    private int[] incidence;
 }
