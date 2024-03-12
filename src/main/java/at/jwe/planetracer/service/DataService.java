@@ -15,7 +15,7 @@ public interface DataService {
 
     Highscore getHighscore(Long levelId);
 
-    Highscore addResult(PlayerResult result);
+    void addResult(PlayerResult result);
 
     Level getLevelData(Long levelId);
 

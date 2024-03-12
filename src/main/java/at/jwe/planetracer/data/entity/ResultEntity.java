@@ -23,7 +23,4 @@ public class ResultEntity {
 
     @Column(name = "result")
     private int[] result;
-
-    @Column(name = "incidence")
-    private int[] incidence;
 }

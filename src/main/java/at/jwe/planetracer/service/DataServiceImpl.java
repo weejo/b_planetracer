@@ -62,7 +62,6 @@ public class DataServiceImpl implements DataService {
 
     private LevelEntity persistLevelEntity(MapData mapData, MapConfig mapConfig, List<Integer> resultList) {
         LevelEntity level = LevelEntity.builder()
-                .initialTime(mapData.initialTime() != null ? mapData.initialTime() : 30)
                 .name(mapData.name() != null ? mapData.name() : "NoName" + Math.random())
                 .height(mapConfig.getHighestY())
                 .width(mapConfig.getHighestX())
@@ -89,6 +88,8 @@ public class DataServiceImpl implements DataService {
                 "orthogonal",
                 8,
                 8,
+                level.getHeight(),
+                level.getWidth(),
                 List.of(new Tileset(0, "tileset.png", 16, 176, 0, "backgroundtileset", 0, 16, 16)));
     }
 
@@ -152,13 +153,23 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public Highscore addResult(PlayerResult result) {
-        Long levelId = result.levelId();
+    public void addResult(PlayerResult playerResult) {
+        Long levelId = playerResult.levelId();
 
-        ResultEntity resultEntity = ResultEntity.builder()
-                .result(result.data())
-                .levelId(levelId)
-                .build();
+        Optional<ResultEntity> optResult = resultRepository.findByLevelId(levelId);
+        ResultEntity resultEntity;
+
+        if(optResult.isPresent()) {
+            resultEntity = optResult.get();
+            for (int i = 0; i < resultEntity.getResult().length; i++) {
+                resultEntity.getResult()[i] += playerResult.data()[i];
+            }
+        } else {
+            resultEntity = ResultEntity.builder()
+                    .result(playerResult.data())
+                    .levelId(levelId)
+                    .build();
+        }
 
         resultRepository.save(resultEntity);
 
@@ -166,27 +177,20 @@ public class DataServiceImpl implements DataService {
         allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints));
 
         HighscoreEntity newScore = HighscoreEntity.builder()
-                .points(result.entry().points())
-                .name(result.entry().name())
+                .points(playerResult.entry().points())
+                .name(playerResult.entry().name())
                 .levelId(levelId)
                 .build();
 
         if (allByLevelId.size() <= 5) {
-            allByLevelId.add(newScore);
             highscoreRepository.save(newScore);
         } else {
             HighscoreEntity last = allByLevelId.get(allByLevelId.size() - 1);
-            if(result.entry().points() > last.getPoints()) {
-                allByLevelId.remove(last);
+            if(playerResult.entry().points() > last.getPoints()) {
                 highscoreRepository.save(newScore);
-                allByLevelId.add(newScore);
+                highscoreRepository.delete(last);
             }
         }
-        List<HighscoreEntry> highscore = new ArrayList<>();
-        for (HighscoreEntity highscoreEntity : allByLevelId) {
-            highscore.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
-        }
-        return new Highscore(highscore);
     }
 
     @Override
@@ -208,6 +212,10 @@ public class DataServiceImpl implements DataService {
             return null;
         }
         List<OverviewLevel> overviewList = new ArrayList<>();
+
+        for (LevelEntity level : allLevels) {
+            overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId()));
+        }
         return new LevelOverview(overviewList);
     }
 }

@@ -69,8 +69,9 @@ class PlanetracerController {
     @PostMapping(path = "result",
             produces = "application/json",
             consumes = "application/json")
-    public ResponseEntity<Highscore> addResult(@RequestBody PlayerResult playerResult) {
-        return ResponseEntity.ok(dataService.addResult(playerResult));
+    public void addResult(@RequestBody PlayerResult playerResult) {
+        dataService.addResult(playerResult);
+        //return ;
     }
 
     @GetMapping(path = "level",
