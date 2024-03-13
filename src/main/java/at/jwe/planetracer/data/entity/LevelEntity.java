@@ -21,9 +21,6 @@ public class LevelEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "initialtime")
-    private Long initialTime;
-
     @Column(name = "width")
     private Long width;
 

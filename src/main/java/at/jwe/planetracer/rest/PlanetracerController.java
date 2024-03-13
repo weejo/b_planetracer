@@ -3,6 +3,7 @@ package at.jwe.planetracer.rest;
 import at.jwe.planetracer.data.record.LevelOverview;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.data.MapData;
+import at.jwe.planetracer.data.record.data.SurveyData;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.level.Level;
@@ -72,6 +73,13 @@ class PlanetracerController {
     public void addResult(@RequestBody PlayerResult playerResult) {
         dataService.addResult(playerResult);
         //return ;
+    }
+
+    @PostMapping(path = "survey",
+            produces = "application/json",
+            consumes = "application/json")
+    public void addSurvey(@RequestBody SurveyData surveyData, @RequestParam Long surveyId) {
+        dataService.addSurvey(surveyId, surveyData);
     }
 
     @GetMapping(path = "level",

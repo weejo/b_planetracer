@@ -40,7 +40,6 @@
   "orientation": "orthogonal",
   "tilesets": [],
   "maxDistance": 500,
-  "initialTime": 30,
   "level_x": -500,
   "level_y": 500,
   "width": 1920,

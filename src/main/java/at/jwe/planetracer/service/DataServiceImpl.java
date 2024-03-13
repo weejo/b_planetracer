@@ -3,20 +3,23 @@ package at.jwe.planetracer.service;
 import at.jwe.planetracer.data.entity.HighscoreEntity;
 import at.jwe.planetracer.data.entity.LevelEntity;
 import at.jwe.planetracer.data.entity.ResultEntity;
+import at.jwe.planetracer.data.entity.SurveyEntity;
 import at.jwe.planetracer.data.record.LevelOverview;
 import at.jwe.planetracer.data.record.OverviewLevel;
-import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.data.MapConfig;
 import at.jwe.planetracer.data.record.data.MapData;
+import at.jwe.planetracer.data.record.data.SurveyData;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
+import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.level.LayerInfo;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.data.record.level.Tileset;
 import at.jwe.planetracer.repository.HighscoreRepository;
 import at.jwe.planetracer.repository.LevelRepository;
 import at.jwe.planetracer.repository.ResultRepository;
+import at.jwe.planetracer.repository.SurveyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,8 @@ public class DataServiceImpl implements DataService {
     private final ResultRepository resultRepository;
 
     private final HighscoreRepository highscoreRepository;
+
+    private final SurveyRepository surveyRepository;
 
     @Autowired
     private MapConfigService mapConfigService;
@@ -144,7 +149,7 @@ public class DataServiceImpl implements DataService {
     @Override
     public Highscore getHighscore(Long levelId) {
         List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
-        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints));
+        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints).reversed());
         List<HighscoreEntry> highscoreEntryList = new ArrayList<>();
         for (HighscoreEntity highscoreEntity : allByLevelId) {
             highscoreEntryList.add(new HighscoreEntry(highscoreEntity.getPoints(), highscoreEntity.getName()));
@@ -159,7 +164,7 @@ public class DataServiceImpl implements DataService {
         Optional<ResultEntity> optResult = resultRepository.findByLevelId(levelId);
         ResultEntity resultEntity;
 
-        if(optResult.isPresent()) {
+        if (optResult.isPresent()) {
             resultEntity = optResult.get();
             for (int i = 0; i < resultEntity.getResult().length; i++) {
                 resultEntity.getResult()[i] += playerResult.data()[i];
@@ -174,7 +179,7 @@ public class DataServiceImpl implements DataService {
         resultRepository.save(resultEntity);
 
         List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
-        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints));
+        allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints).reversed());
 
         HighscoreEntity newScore = HighscoreEntity.builder()
                 .points(playerResult.entry().points())
@@ -182,11 +187,11 @@ public class DataServiceImpl implements DataService {
                 .levelId(levelId)
                 .build();
 
-        if (allByLevelId.size() <= 5) {
+        if (allByLevelId.size() < 5) {
             highscoreRepository.save(newScore);
         } else {
             HighscoreEntity last = allByLevelId.get(allByLevelId.size() - 1);
-            if(playerResult.entry().points() > last.getPoints()) {
+            if (playerResult.entry().points() > last.getPoints()) {
                 highscoreRepository.save(newScore);
                 highscoreRepository.delete(last);
             }
@@ -197,7 +202,7 @@ public class DataServiceImpl implements DataService {
     public Level getLevelData(Long levelId) {
         Optional<LevelEntity> levelEntity = levelRepository.findById(levelId);
 
-        if(levelEntity.isEmpty()) {
+        if (levelEntity.isEmpty()) {
             throw new RuntimeException("Level with given ID:" + levelId + " not found!");
         }
 
@@ -217,5 +222,16 @@ public class DataServiceImpl implements DataService {
             overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId()));
         }
         return new LevelOverview(overviewList);
+    }
+
+    @Override
+    public void addSurvey(Long surveyId, SurveyData surveyData) {
+        SurveyEntity newEntity = SurveyEntity.builder()
+                .surveyId(surveyId)
+                .answer1(surveyData.answer1())
+                .answer2(surveyData.answer2())
+                .answer3(surveyData.answer3())
+                .build();
+        surveyRepository.save(newEntity);
     }
 }

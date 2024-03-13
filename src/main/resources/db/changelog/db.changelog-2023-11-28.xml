@@ -3,6 +3,42 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="0" author="jwe">
+        <createTable tableName="level">
+            <column name="levelid" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="levelPK"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="width" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="height" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="playerx" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="playery" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="data" type="INTEGER[]">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1" author="jwe">
+        <addUniqueConstraint tableName="level" columnNames="name" constraintName="UNIQUE_LEVEL_NAME"/>
+    </changeSet>
+
+    <changeSet id="2" author="jwe">
+        <createIndex tableName="level" indexName="LEVELNAME">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
     <changeSet id="3" author="jwe">
         <createTable tableName="result">
             <column name="resultid" type="BIGINT" autoIncrement="true">
