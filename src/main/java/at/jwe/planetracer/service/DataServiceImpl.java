@@ -1,29 +1,27 @@
 package at.jwe.planetracer.service;
 
+import at.jwe.planetracer.data.entity.BehaviorEntity;
 import at.jwe.planetracer.data.entity.HighscoreEntity;
 import at.jwe.planetracer.data.entity.LevelEntity;
 import at.jwe.planetracer.data.entity.ResultEntity;
-import at.jwe.planetracer.data.entity.SurveyEntity;
 import at.jwe.planetracer.data.record.LevelOverview;
 import at.jwe.planetracer.data.record.OverviewLevel;
+import at.jwe.planetracer.data.record.PlayerResult;
 import at.jwe.planetracer.data.record.cluster.ClusterResult;
 import at.jwe.planetracer.data.record.data.MapConfig;
 import at.jwe.planetracer.data.record.data.MapData;
-import at.jwe.planetracer.data.record.data.SurveyData;
 import at.jwe.planetracer.data.record.highscore.Highscore;
 import at.jwe.planetracer.data.record.highscore.HighscoreEntry;
-import at.jwe.planetracer.data.record.highscore.PlayerResult;
 import at.jwe.planetracer.data.record.level.LayerInfo;
 import at.jwe.planetracer.data.record.level.Level;
 import at.jwe.planetracer.data.record.level.Tileset;
+import at.jwe.planetracer.repository.BehaviorRepository;
 import at.jwe.planetracer.repository.HighscoreRepository;
 import at.jwe.planetracer.repository.LevelRepository;
 import at.jwe.planetracer.repository.ResultRepository;
-import at.jwe.planetracer.repository.SurveyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,10 +38,9 @@ public class DataServiceImpl implements DataService {
 
     private final HighscoreRepository highscoreRepository;
 
-    private final SurveyRepository surveyRepository;
+    private final BehaviorRepository behaviorRepository;
 
-    @Autowired
-    private MapConfigService mapConfigService;
+    private final MapConfigService mapConfigService;
 
 
     @Override
@@ -89,7 +86,7 @@ public class DataServiceImpl implements DataService {
 
 
     private static Level getLevelOutput(LevelEntity level) {
-        return new Level(List.of(new LayerInfo(level.getName(), level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth(), 0, 0)),
+        return new Level(List.of(new LayerInfo("base_layer", level.getData(), level.getHeight(), 1, "tilelayer", true, level.getWidth(), 0, 0)),
                 "orthogonal",
                 8,
                 8,
@@ -160,23 +157,28 @@ public class DataServiceImpl implements DataService {
     @Override
     public void addResult(PlayerResult playerResult) {
         Long levelId = playerResult.levelId();
+        ResultEntity resultEntity = ResultEntity.builder()
+                .levelId(playerResult.levelId())
+                .result(playerResult.playerData().clusterData())
+                .pathLength(playerResult.playerData().pathLength())
+                .score(playerResult.entry().points())
+                .build();
 
-        Optional<ResultEntity> optResult = resultRepository.findByLevelId(levelId);
-        ResultEntity resultEntity;
+        ResultEntity save = resultRepository.save(resultEntity);
 
-        if (optResult.isPresent()) {
-            resultEntity = optResult.get();
-            for (int i = 0; i < resultEntity.getResult().length; i++) {
-                resultEntity.getResult()[i] += playerResult.data()[i];
-            }
-        } else {
-            resultEntity = ResultEntity.builder()
-                    .result(playerResult.data())
-                    .levelId(levelId)
-                    .build();
-        }
+        BehaviorEntity behaviorEntity = BehaviorEntity.builder()
+                .resultID(save.getResultId())
+                .countUp(playerResult.playerData().inputData().countUp())
+                .timeUp(playerResult.playerData().inputData().timeUp())
+                .countLeft(playerResult.playerData().inputData().countLeft())
+                .timeLeft(playerResult.playerData().inputData().timeLeft())
+                .countRight(playerResult.playerData().inputData().countRight())
+                .timeRight(playerResult.playerData().inputData().timeRight())
+                .countSpace(playerResult.playerData().inputData().countSpace())
+                .timeSpace(playerResult.playerData().inputData().timeSpace())
+                .build();
 
-        resultRepository.save(resultEntity);
+        behaviorRepository.save(behaviorEntity);
 
         List<HighscoreEntity> allByLevelId = highscoreRepository.findAllByLevelId(levelId);
         allByLevelId.sort(Comparator.comparingInt(HighscoreEntity::getPoints).reversed());
@@ -222,16 +224,5 @@ public class DataServiceImpl implements DataService {
             overviewList.add(new OverviewLevel(level.getName(), level.getWidth().toString() + "x" + level.getHeight().toString(), level.getLevelId()));
         }
         return new LevelOverview(overviewList);
-    }
-
-    @Override
-    public void addSurvey(Long surveyId, SurveyData surveyData) {
-        SurveyEntity newEntity = SurveyEntity.builder()
-                .surveyId(surveyId)
-                .answer1(surveyData.answer1())
-                .answer2(surveyData.answer2())
-                .answer3(surveyData.answer3())
-                .build();
-        surveyRepository.save(newEntity);
     }
 }

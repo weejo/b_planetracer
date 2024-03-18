@@ -23,4 +23,10 @@ public class ResultEntity {
 
     @Column(name = "result")
     private int[] result;
+
+    @Column(name ="score")
+    private int score;
+
+    @Column(name ="pathlength")
+    private Long pathLength;
 }
