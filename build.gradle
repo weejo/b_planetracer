@@ -61,12 +61,12 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'at.jwe.planetracer.PlanetracerApplication',
+                'Main-Class': 'at.jwe.snyder.SnyderApplication',
                 'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' ')
         )
     }
     enabled = false
-    archiveFileName.set("planetracer-"+version+".jar")
+    archiveFileName.set("snyder-"+version+".jar")
 }
 
 tasks.named('test') {
@@ -75,8 +75,8 @@ tasks.named('test') {
 
 tasks.register('createDockerFile', Dockerfile) {
     from 'eclipse-temurin:17'
-    copyFile jar.archiveFileName.get(), '/app/planetracer.jar'
-    entryPoint('java', '-Ddatasource.host=postgres','-jar', '/app/planetracer.jar')
+    copyFile jar.archiveFileName.get(), '/app/snyder.jar'
+    entryPoint('java', '-Ddatasource.host=postgres','-jar', '/app/snyder.jar')
     exposePort 8080
 }
 tasks.register('syncJar', Copy) {
@@ -87,9 +87,6 @@ tasks.register('syncJar', Copy) {
 tasks.register('buildImage', DockerBuildImage) {
     dependsOn createDockerFile, syncJar
     inputDir = createDockerFile.getDestDir()
-    images = ["planetracer:"+version]
-}
-tasks.register('pushDockerImage', DockerPushImage) {
-    dependsOn buildImage
+    images = ["snyder:"+version]
 }
 
