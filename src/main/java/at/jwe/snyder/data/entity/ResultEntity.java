@@ -16,10 +16,10 @@ public class ResultEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "resultid")
-    private Long resultId;
+    private Integer resultId;
 
     @Column(name = "levelid")
-    private Long levelId;
+    private Integer levelId;
 
     @Column(name = "result")
     private int[] result;
@@ -28,5 +28,5 @@ public class ResultEntity {
     private int score;
 
     @Column(name ="pathlength")
-    private Long pathLength;
+    private int pathLength;
 }

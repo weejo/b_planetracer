@@ -8,7 +8,7 @@
             <column name="score" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="pathlength" type="BIGINT">
+            <column name="pathlength" type="INT">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -16,34 +16,34 @@
 
     <changeSet id="202403171" author="jwe">
         <createTable tableName="behavior">
-            <column name="behaviorid" type="BIGINT" autoIncrement="true">
+            <column name="behaviorid" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="behaviorPK"/>
             </column>
-            <column name="resultid" type="BIGINT">
+            <column name="resultid" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="countup" type="BIGINT">
+            <column name="countup" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="timeup" type="BIGINT">
+            <column name="timeup" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="countleft" type="BIGINT">
+            <column name="countleft" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="timeleft" type="BIGINT">
+            <column name="timeleft" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="countright" type="BIGINT">
+            <column name="countright" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="timeright" type="BIGINT">
+            <column name="timeright" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="countspace" type="BIGINT">
+            <column name="countspace" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="timespace" type="BIGINT">
+            <column name="timespace" type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>

@@ -14,10 +14,10 @@ public class ComputationRunnable implements Runnable {
     private final List<Double> cellValues = new ArrayList<>();
 
     private final MapConfig mapConfig;
-    private final long startRow;
-    private final long endRow;
+    private final int startRow;
+    private final int endRow;
 
-    ComputationRunnable(MapConfig mapConfig, long startRow, long endRow) {
+    ComputationRunnable(MapConfig mapConfig, int startRow, int endRow) {
         this.mapConfig = mapConfig;
         this.startRow = startRow;
         this.endRow = endRow;
@@ -28,8 +28,8 @@ public class ComputationRunnable implements Runnable {
     @Override
     public void run() {
         System.out.println("Thread " + Thread.currentThread().getId() + " started!");
-        for (long y = startRow; y < endRow; y++) {
-            for (long x = 0; x < mapConfig.getHighestX(); x++) {
+        for (int y = startRow; y < endRow; y++) {
+            for (int x = 0; x < mapConfig.getHighestX(); x++) {
 
                 double cellValue = 0.0;
 

@@ -1,10 +1,9 @@
 package at.jwe.snyder.rest;
 
 import at.jwe.snyder.data.record.LevelOverview;
-import at.jwe.snyder.data.record.cluster.ClusterResult;
+import at.jwe.snyder.data.record.PlayerResult;
 import at.jwe.snyder.data.record.data.MapData;
 import at.jwe.snyder.data.record.highscore.Highscore;
-import at.jwe.snyder.data.record.PlayerResult;
 import at.jwe.snyder.data.record.level.Level;
 import at.jwe.snyder.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +37,11 @@ class SnyderController {
      * @return all user generated clusters
      */
 
-    @GetMapping(path = "clusters",
+    @GetMapping(path = "computeSolutions",
             produces = "application/json")
-    public ResponseEntity<ClusterResult> getClusters(@RequestParam Long levelId, @RequestParam Long threshold) {
-        ClusterResult clusters = dataService.getClusters(levelId, threshold);
-        if (clusters == null) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(clusters);
-        }
+    public ResponseEntity computeSolutions(@RequestParam int levelId, @RequestParam String cutoff) {
+        dataService.computeSolution(levelId, Float.parseFloat(cutoff));
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -62,7 +57,7 @@ class SnyderController {
 
     @GetMapping(path = "highscore",
             produces = "application/json")
-    public ResponseEntity<Highscore> getHighscore(@RequestParam Long levelId) {
+    public ResponseEntity<Highscore> getHighscore(@RequestParam int levelId) {
         return ResponseEntity.ok(dataService.getHighscore(levelId));
     }
 
@@ -75,7 +70,7 @@ class SnyderController {
 
     @GetMapping(path = "level",
             produces = "application/json")
-    public ResponseEntity<Level> getLevelData(@RequestParam Long levelId) {
+    public ResponseEntity<Level> getLevelData(@RequestParam int levelId) {
         return ResponseEntity.ok(dataService.getLevelData(levelId));
     }
 

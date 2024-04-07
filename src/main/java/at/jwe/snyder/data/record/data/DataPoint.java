@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataPoint {
-    private Long x;
-    private Long y;
-    private Long id;
+    private int x;
+    private int y;
+    private int id;
 }

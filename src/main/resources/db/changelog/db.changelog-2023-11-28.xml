@@ -5,22 +5,22 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="0" author="jwe">
         <createTable tableName="level">
-            <column name="levelid" type="BIGINT" autoIncrement="true">
+            <column name="levelid" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="levelPK"/>
             </column>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="width" type="BIGINT">
+            <column name="width" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="height" type="BIGINT">
+            <column name="height" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="playerx" type="BIGINT">
+            <column name="playerx" type="INT">
                 <constraints nullable="true"/>
             </column>
-            <column name="playery" type="BIGINT">
+            <column name="playery" type="INT">
                 <constraints nullable="true"/>
             </column>
             <column name="data" type="INTEGER[]">
@@ -41,10 +41,10 @@
 
     <changeSet id="3" author="jwe">
         <createTable tableName="result">
-            <column name="resultid" type="BIGINT" autoIncrement="true">
+            <column name="resultid" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="resultPK"/>
             </column>
-            <column name="levelid" type="BIGINT">
+            <column name="levelid" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="result" type="INTEGER[]">

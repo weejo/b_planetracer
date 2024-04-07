@@ -6,16 +6,16 @@
 
     <changeSet id="202403120" author="jwe">
         <createTable tableName="highscore">
-            <column name="highscoreid" type="BIGINT" autoIncrement="true">
+            <column name="highscoreid" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="highscorePK"/>
             </column>
-            <column name="levelid" type="BIGINT">
+            <column name="levelid" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="points" type="BIGINT">
+            <column name="points" type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>

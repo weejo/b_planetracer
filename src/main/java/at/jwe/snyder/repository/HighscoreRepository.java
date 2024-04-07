@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HighscoreRepository extends JpaRepository<HighscoreEntity, Long> {
+public interface HighscoreRepository extends JpaRepository<HighscoreEntity, Integer> {
 
-    List<HighscoreEntity> findAllByLevelId(Long levelId);
+    List<HighscoreEntity> findAllByLevelId(Integer levelId);
 }

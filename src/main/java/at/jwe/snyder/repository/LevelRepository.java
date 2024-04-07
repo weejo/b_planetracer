@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface LevelRepository extends JpaRepository<LevelEntity, Long> {
+public interface LevelRepository extends JpaRepository<LevelEntity, Integer> {
     Optional<LevelEntity> findByName(String name);
 
     @Override

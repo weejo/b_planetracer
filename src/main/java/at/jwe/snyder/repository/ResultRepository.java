@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ResultRepository extends JpaRepository<ResultEntity, Long> {
-    List<ResultEntity> findAllByLevelId(Long levelId);
+public interface ResultRepository extends JpaRepository<ResultEntity, Integer> {
+    List<ResultEntity> findAllByLevelId(Integer levelId);
 
-    Optional<ResultEntity> findByLevelId(Long levelId);
+    Optional<ResultEntity> findByLevelId(Integer levelId);
 }

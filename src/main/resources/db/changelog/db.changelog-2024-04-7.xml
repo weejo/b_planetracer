@@ -1,0 +1,80 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="202404070" author="jwe">
+        <createTable tableName="datapoint">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="datapointPK"/>
+            </column>
+            <column name="level_levelid" type="INT"/>
+
+            <column name="external" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="x" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="202404071" author="jwe">
+        <createTable tableName="solution">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="solutionPK"/>
+            </column>
+
+            <column name="levelid" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cutoff" type="INT"/>
+
+            <column name="created" type="TIMESTAMP"/>
+
+        </createTable>
+    </changeSet>
+
+    <changeSet id="202404072" author="jwe">
+        <createTable tableName="solutiondatapoint">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="solutiondatapointPK"/>
+            </column>
+            <column name="solution_id" type="INT"/>
+
+            <column name="external" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="x" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="202404073" author="jwe">
+        <addForeignKeyConstraint baseTableName="solution" baseColumnNames="levelid" constraintName="FK_levelid_SOLUTION"
+                                 referencedTableName="level"
+                                 referencedColumnNames="levelid"/>
+    </changeSet>
+
+    <changeSet id="202404074" author="jwe">
+        <addColumn tableName="level">
+            <column name="changex" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changey" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

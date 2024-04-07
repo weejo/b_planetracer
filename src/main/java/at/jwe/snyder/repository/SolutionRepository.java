@@ -1,9 +1,9 @@
 package at.jwe.snyder.repository;
 
-import at.jwe.snyder.data.entity.BehaviorEntity;
+import at.jwe.snyder.data.entity.SolutionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BehaviorRepository extends JpaRepository<BehaviorEntity, Integer> {
+public interface SolutionRepository extends JpaRepository<SolutionEntity, Integer> {
 }

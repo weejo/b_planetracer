@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 @NoArgsConstructor
 public class MapConfigService {
-    private static final Long MARGIN = 250L;
-    private Long changeX= Long.MAX_VALUE;
-    private Long changeY = Long.MAX_VALUE;
+    private static final int MARGIN = 250;
+    private int changeX= Integer.MAX_VALUE;
+    private int changeY = Integer.MAX_VALUE;
 
     public MapConfig computeMapConfig(MapData mapData) {
         MapConfig mapConfig = getMapConfig(mapData);
@@ -66,15 +66,17 @@ public class MapConfigService {
         }
 
         // Properly set highestX and highestY with the now known changeX/Y values.
-        mapConfig.setHighestX(mapConfig.getHighestX() + changeX);
-        mapConfig.setHighestY(mapConfig.getHighestY() + changeY);
+        mapConfig.setChangeX(changeX);
+        mapConfig.setChangeY(changeY);
+        mapConfig.setHighestX(mapConfig.getHighestX() + (changeX*2));
+        mapConfig.setHighestY(mapConfig.getHighestY() + (changeY*2));
     }
 
     private MapConfig getMapConfig(MapData mapData) {
         // initialise default values
         MapConfig mapConfig = MapConfig.builder()
-                .highestX(Long.MIN_VALUE)
-                .highestY(Long.MIN_VALUE)
+                .highestX(Integer.MIN_VALUE)
+                .highestY(Integer.MIN_VALUE)
                 .dataPoints(mapData.dataPoints())
                 .build();
 

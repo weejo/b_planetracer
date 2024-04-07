@@ -16,32 +16,32 @@ public class BehaviorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name ="behaviorid")
-    private Long behaviorId;
+    private Integer behaviorId;
 
     @Column(name = "resultid")
-    private Long resultID;
+    private Integer resultID;
 
     @Column(name ="countup")
-    private Long countUp;
+    private int countUp;
 
     @Column(name ="timeup")
-    private Long timeUp;
+    private int timeUp;
 
     @Column(name ="countleft")
-    private Long countLeft;
+    private int countLeft;
 
     @Column(name ="timeleft")
-    private Long timeLeft;
+    private int timeLeft;
 
     @Column(name ="countright")
-    private Long countRight;
+    private int countRight;
 
     @Column(name ="timeright")
-    private Long timeRight;
+    private int timeRight;
 
     @Column(name ="countspace")
-    private Long countSpace;
+    private int countSpace;
 
     @Column(name ="timespace")
-    private Long timeSpace;
+    private int timeSpace;
 }

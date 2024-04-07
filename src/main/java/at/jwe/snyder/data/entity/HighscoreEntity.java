@@ -17,10 +17,10 @@ public class HighscoreEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name ="HIGHSCOREID")
-    private Long highscoreId;
+    private Integer highscoreId;
 
     @Column(name = "LEVELID")
-    private Long levelId;
+    private Integer levelId;
 
     @Column(name = "POINTS")
     private int points;
