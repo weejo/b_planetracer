@@ -47,7 +47,7 @@ class SnyderController {
         return ResponseEntity.ok(solution);
     }
 
-    @GetMapping(path = "getSolution",
+    @GetMapping(path = "getAllSolutions",
             produces = "application/json")
     public ResponseEntity<List<Solution>> getAllSolutions(@RequestParam int levelId) {
         List<Solution> result = dataService.getAllSolutions(levelId);
