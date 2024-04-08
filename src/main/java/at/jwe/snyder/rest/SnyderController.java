@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/")
 class SnyderController {
@@ -43,6 +45,13 @@ class SnyderController {
     public ResponseEntity<Solution> getSolution(@RequestParam int levelId, @RequestParam String cutoff) {
         Solution solution = dataService.computeSolution(levelId, Float.parseFloat(cutoff));
         return ResponseEntity.ok(solution);
+    }
+
+    @GetMapping(path = "getSolution",
+            produces = "application/json")
+    public ResponseEntity<List<Solution>> getAllSolutions(@RequestParam int levelId) {
+        List<Solution> result = dataService.getAllSolutions(levelId);
+        return ResponseEntity.ok(result);
     }
 
     /**

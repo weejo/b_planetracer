@@ -5,6 +5,7 @@ import at.jwe.snyder.converter.PlayerResultToResultEntityConverter;
 import at.jwe.snyder.converter.SolutionEntityToSolutionConverter;
 import at.jwe.snyder.data.entity.HighscoreEntity;
 import at.jwe.snyder.data.entity.ResultEntity;
+import at.jwe.snyder.data.entity.SolutionEntity;
 import at.jwe.snyder.data.record.LevelOverview;
 import at.jwe.snyder.data.record.PlayerResult;
 import at.jwe.snyder.data.record.data.MapData;
@@ -107,5 +108,15 @@ public class DataServiceImpl implements DataService {
     @Override
     public LevelOverview getLevelOverview() {
         return levelService.getLevelOverview();
+    }
+
+    @Override
+    public List<Solution> getAllSolutions(int levelId) {
+        List<SolutionEntity> solutions = solutionService.getSolutions(levelId);
+        List<Solution> result = new ArrayList<>();
+        for (SolutionEntity solution : solutions) {
+            result.add(solutionEntityToSolutionConverter.convert(solution));
+        }
+        return result;
     }
 }

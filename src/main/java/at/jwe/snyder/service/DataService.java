@@ -7,6 +7,8 @@ import at.jwe.snyder.data.record.highscore.Highscore;
 import at.jwe.snyder.data.record.level.Level;
 import at.jwe.snyder.data.record.output.Solution;
 
+import java.util.List;
+
 public interface DataService {
 
     Level addLevel(MapData mapData);
@@ -21,4 +23,5 @@ public interface DataService {
 
     LevelOverview getLevelOverview();
 
+    List<Solution> getAllSolutions(int levelId);
 }

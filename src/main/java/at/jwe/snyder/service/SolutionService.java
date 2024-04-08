@@ -1,6 +1,8 @@
 package at.jwe.snyder.service;
 
-import at.jwe.snyder.data.entity.*;
+import at.jwe.snyder.data.entity.LevelEntity;
+import at.jwe.snyder.data.entity.ResultEntity;
+import at.jwe.snyder.data.entity.SolutionEntity;
 import at.jwe.snyder.repository.LevelRepository;
 import at.jwe.snyder.repository.ResultRepository;
 import at.jwe.snyder.repository.SolutionRepository;
@@ -75,5 +77,9 @@ public class SolutionService {
             }
         }
         return (int) (highest * cutoff);
+    }
+
+    public List<SolutionEntity> getSolutions(int levelId) {
+        return solutionRepository.findAllByLevelId(levelId);
     }
 }
