@@ -27,39 +27,17 @@
             <column name="id" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="solutionPK"/>
             </column>
-
             <column name="levelid" type="INT">
                 <constraints nullable="false"/>
             </column>
-
             <column name="cutoff" type="INT"/>
-
             <column name="created" type="TIMESTAMP"/>
-
-        </createTable>
-    </changeSet>
-
-    <changeSet id="202404072" author="jwe">
-        <createTable tableName="solutiondatapoint">
-            <column name="id" type="INT" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="solutiondatapointPK"/>
-            </column>
-            <column name="solution_id" type="INT"/>
-
-            <column name="external" type="INT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="y" type="INT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="x" type="INT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="value" type="INT">
+            <column name="aggregatedsolution" type="INTEGER[][]">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
+
 
     <changeSet id="202404073" author="jwe">
         <addForeignKeyConstraint baseTableName="solution" baseColumnNames="levelid" constraintName="FK_levelid_SOLUTION"

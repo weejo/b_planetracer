@@ -1,11 +1,11 @@
 package at.jwe.snyder.data.entity;
 
+import io.hypersistence.utils.hibernate.type.array.IntArrayType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -31,6 +31,14 @@ public class SolutionEntity {
     @Column(name = "created")
     private LocalDateTime created;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "solutionEntity")
-    private List<SolutionDataPointEntity> realDataPoints = new ArrayList();
+    @Type(
+            value = IntArrayType.class,
+            parameters = @org.hibernate.annotations.Parameter(
+                    name = "sql_array_type",
+                    value = "int"
+            )
+    )
+    @Column(name = "aggregatedsolution",
+            columnDefinition = "int[][]")
+    private int[][] aggregatedsolution;
 }

@@ -47,7 +47,7 @@
             <column name="levelid" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="result" type="INTEGER[]">
+            <column name="result" type="INTEGER[][]">
                 <constraints nullable="false"/>
             </column>
         </createTable>

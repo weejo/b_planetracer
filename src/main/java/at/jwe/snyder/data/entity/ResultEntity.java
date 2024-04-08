@@ -1,7 +1,9 @@
 package at.jwe.snyder.data.entity;
 
+import io.hypersistence.utils.hibernate.type.array.IntArrayType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 @Getter
 @Setter
@@ -21,12 +23,20 @@ public class ResultEntity {
     @Column(name = "levelid")
     private Integer levelId;
 
-    @Column(name = "result")
-    private int[] result;
+    @Type(
+            value = IntArrayType.class,
+            parameters = @org.hibernate.annotations.Parameter(
+                    name = "sql_array_type",
+                    value = "int"
+            )
+    )
+    @Column(name = "result",
+            columnDefinition = "int[][]")
+    private int[][] result;
 
-    @Column(name ="score")
+    @Column(name = "score")
     private int score;
 
-    @Column(name ="pathlength")
+    @Column(name = "pathlength")
     private int pathLength;
 }

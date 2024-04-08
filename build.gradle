@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.7.3")
 
     testImplementation 'org.projectlombok:lombok:1.18.28'
 

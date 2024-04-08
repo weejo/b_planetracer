@@ -2,6 +2,7 @@ package at.jwe.snyder.service;
 
 import at.jwe.snyder.converter.PlayerResultToBehaviorEntityConverter;
 import at.jwe.snyder.converter.PlayerResultToResultEntityConverter;
+import at.jwe.snyder.converter.SolutionEntityToSolutionConverter;
 import at.jwe.snyder.data.entity.HighscoreEntity;
 import at.jwe.snyder.data.entity.ResultEntity;
 import at.jwe.snyder.data.record.LevelOverview;
@@ -10,6 +11,7 @@ import at.jwe.snyder.data.record.data.MapData;
 import at.jwe.snyder.data.record.highscore.Highscore;
 import at.jwe.snyder.data.record.highscore.HighscoreEntry;
 import at.jwe.snyder.data.record.level.Level;
+import at.jwe.snyder.data.record.output.Solution;
 import at.jwe.snyder.repository.BehaviorRepository;
 import at.jwe.snyder.repository.HighscoreRepository;
 import at.jwe.snyder.repository.ResultRepository;
@@ -24,7 +26,6 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 @Slf4j
 public class DataServiceImpl implements DataService {
 
@@ -42,16 +43,20 @@ public class DataServiceImpl implements DataService {
 
     private final PlayerResultToBehaviorEntityConverter playerResultToBehaviorEntityConverter;
 
+    private final SolutionEntityToSolutionConverter solutionEntityToSolutionConverter;
+
 
     @Override
+    @Transactional
     public Level addLevel(MapData mapData) {
         log.atInfo().log("Adding Map!");
         return levelService.addLevel(mapData);
     }
 
     @Override
-    public void computeSolution(int levelId, float cutoff) {
-        solutionService.computeSolution(levelId, cutoff);
+    @Transactional
+    public Solution computeSolution(int levelId, float cutoff) {
+        return solutionEntityToSolutionConverter.convert(solutionService.computeSolution(levelId, cutoff));
     }
 
     @Override
@@ -66,6 +71,7 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
+    @Transactional
     public void addResult(PlayerResult playerResult) {
         int levelId = playerResult.levelId();
 

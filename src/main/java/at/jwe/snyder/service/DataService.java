@@ -5,12 +5,13 @@ import at.jwe.snyder.data.record.PlayerResult;
 import at.jwe.snyder.data.record.data.MapData;
 import at.jwe.snyder.data.record.highscore.Highscore;
 import at.jwe.snyder.data.record.level.Level;
+import at.jwe.snyder.data.record.output.Solution;
 
 public interface DataService {
 
     Level addLevel(MapData mapData);
 
-    void computeSolution(int levelId, float cutoff);
+    Solution computeSolution(int levelId, float cutoff);
 
     Highscore getHighscore(int levelId);
 

@@ -5,6 +5,7 @@ import at.jwe.snyder.data.record.PlayerResult;
 import at.jwe.snyder.data.record.data.MapData;
 import at.jwe.snyder.data.record.highscore.Highscore;
 import at.jwe.snyder.data.record.level.Level;
+import at.jwe.snyder.data.record.output.Solution;
 import at.jwe.snyder.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +38,11 @@ class SnyderController {
      * @return all user generated clusters
      */
 
-    @GetMapping(path = "computeSolutions",
+    @GetMapping(path = "getSolution",
             produces = "application/json")
-    public ResponseEntity computeSolutions(@RequestParam int levelId, @RequestParam String cutoff) {
-        dataService.computeSolution(levelId, Float.parseFloat(cutoff));
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Solution> getSolution(@RequestParam int levelId, @RequestParam String cutoff) {
+        Solution solution = dataService.computeSolution(levelId, Float.parseFloat(cutoff));
+        return ResponseEntity.ok(solution);
     }
 
     /**
